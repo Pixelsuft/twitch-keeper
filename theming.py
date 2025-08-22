@@ -12,27 +12,40 @@ class Theming:
             build_num = sys.getwindowsversion().build
             self.ux_theme = ctypes.windll.uxtheme
             if build_num >= 17763:
-                self.ShouldAppsUseDarkMode = self.ux_theme.__getitem__(132)
-                self.ShouldAppsUseDarkMode.argtypes = ()
-                self.ShouldAppsUseDarkMode.restype = ctypes.c_bool
-                self.AllowDarkModeForWindow = self.ux_theme.__getitem__(133)
-                self.AllowDarkModeForWindow.argtypes = (wintypes.HWND, ctypes.c_bool)
-                self.AllowDarkModeForWindow.restype = None
+                try:
+                    self.ShouldAppsUseDarkMode = self.ux_theme.__getitem__(132)
+                    self.ShouldAppsUseDarkMode.argtypes = ()
+                    self.ShouldAppsUseDarkMode.restype = ctypes.c_bool
+                except AttributeError:
+                    self.ShouldAppsUseDarkMode = None
+                try:
+                    self.AllowDarkModeForWindow = self.ux_theme.__getitem__(133)
+                    self.AllowDarkModeForWindow.argtypes = (wintypes.HWND, ctypes.c_bool)
+                    self.AllowDarkModeForWindow.restype = None
+                except AttributeError:
+                    self.AllowDarkModeForWindow = None
             else:
                 self.ShouldAppsUseDarkMode = None
                 self.AllowDarkModeForWindow = None
             if 17763 <= build_num < 18362:
-                self.AllowDarkModeForApp = self.ux_theme.__getitem__(135)
-                self.AllowDarkModeForApp.argtypes = ()
-                self.AllowDarkModeForApp.restype = None
+                try:
+                    self.AllowDarkModeForApp = self.ux_theme.__getitem__(135)
+                    self.AllowDarkModeForApp.argtypes = ()
+                    self.AllowDarkModeForApp.restype = None
+                except AttributeError:
+                    self.AllowDarkModeForApp = None
             else:
                 self.AllowDarkModeForApp = None
             if build_num >= 18362:
-                self.SetPreferredAppMode = self.ux_theme.__getitem__(135)
-                self.SetPreferredAppMode.argtypes = (ctypes.c_int, )
-                self.SetPreferredAppMode.restype = ctypes.c_int
+                try:
+                    self.SetPreferredAppMode = self.ux_theme.__getitem__(135)
+                    self.SetPreferredAppMode.argtypes = (ctypes.c_int, )
+                    self.SetPreferredAppMode.restype = ctypes.c_int
+                except AttributeError:
+                    self.SetPreferredAppMode = None
             else:
                 self.SetPreferredAppMode = None
+            # Enables dark context menu on window
             if self.AllowDarkModeForApp:
                 self.AllowDarkModeForApp()
             if self.SetPreferredAppMode:
