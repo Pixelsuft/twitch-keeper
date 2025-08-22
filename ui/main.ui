@@ -10,8 +10,13 @@
     <height>400</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>22</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Twitch Keeper</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -20,7 +25,34 @@
   <property name="locale">
    <locale language="English" country="UnitedStates"/>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPushButton" name="vodButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>300</width>
+      <height>60</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>VOD Downloader</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="streamButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>80</y>
+      <width>300</width>
+      <height>60</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Stream Downloader</string>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections/>
