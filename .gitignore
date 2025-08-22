@@ -80,3 +80,4 @@ cython_debug/
 .cursorindexingignore
 *.DS_Store
 push.bat
+ui_*.py
