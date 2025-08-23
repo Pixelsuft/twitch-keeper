@@ -2,6 +2,21 @@ import sys
 import ctypes
 if sys.platform == 'win32':
     from ctypes import wintypes
+
+    class AccentPolicy(ctypes.Structure):
+        _fields_ = [
+            ("AccentState", wintypes.DWORD),
+            ("AccentFlags", wintypes.DWORD),
+            ("GradientColor", wintypes.DWORD),
+            ("AnimationId", wintypes.DWORD),
+        ]
+
+    class WindowCompositionAttributes(ctypes.Structure):
+        _fields_ = [
+            ("Attribute", wintypes.DWORD),
+            ("Data", ctypes.POINTER(AccentPolicy)),
+            ("SizeOfData", wintypes.ULONG),
+        ]
 else:
     import darkdetect
 
@@ -11,6 +26,7 @@ class Theming:
         if sys.platform == 'win32':
             build_num = sys.getwindowsversion().build
             self.ux_theme = ctypes.windll.uxtheme
+            self.user32 = ctypes.windll.user32
             if build_num >= 17763:
                 try:
                     self.ShouldAppsUseDarkMode = self.ux_theme.__getitem__(132)
@@ -45,20 +61,29 @@ class Theming:
                     self.SetPreferredAppMode = None
             else:
                 self.SetPreferredAppMode = None
+            if build_num >= 18362:
+                self.SetWindowCompositionAttribute = self.user32.SetWindowCompositionAttribute
+                self.SetWindowCompositionAttribute.argtypes = (wintypes.HWND, ctypes.POINTER(WindowCompositionAttributes))
+                self.SetWindowCompositionAttribute.restype = wintypes.BOOL
+            else:
+                self.SetWindowCompositionAttribute = None
             # Enables dark context menu on window
             if self.AllowDarkModeForApp:
                 self.AllowDarkModeForApp()
             if self.SetPreferredAppMode:
                 self.SetPreferredAppMode(1)
 
-    def init_on_window(self, win) -> None:
+    def init_on_window(self, win: any, dark: bool) -> None:
         if not sys.platform == 'win32':
             return
         hwnd = int(win.winId())
         if not hwnd:
             return
-        # I don't think I should use SetWindowCompositionAttributeFunc for dark mode cuz Qt done similar for us
         self.AllowDarkModeForWindow(hwnd, True)
+        if self.SetWindowCompositionAttribute:
+            data = AccentPolicy(int(dark), 0, 0, 0)
+            attr = WindowCompositionAttributes(26, ctypes.pointer(data), ctypes.sizeof(AccentPolicy))
+            self.SetWindowCompositionAttribute(hwnd, ctypes.pointer(attr))
 
     def is_dark(self) -> bool:
         if not sys.platform == 'win32':

@@ -23,8 +23,8 @@ class App:
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self.main_win)
         self.main_win.setFixedSize(self.main_win.size())
-        self.theming.init_on_window(self.main_win)
         self.dark = self.theming.is_dark()
+        self.theming.init_on_window(self.main_win, self.dark)
         self.styling.read_styles(os.path.join(self.cwd, 'styles'), not self.dark, self.dark)
         self.styling.apply_on_win(self.main_win, self.dark)
 
