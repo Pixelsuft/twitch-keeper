@@ -62,9 +62,12 @@ class Theming:
             else:
                 self.SetPreferredAppMode = None
             if build_num >= 18362:
-                self.SetWindowCompositionAttribute = self.user32.SetWindowCompositionAttribute
-                self.SetWindowCompositionAttribute.argtypes = (wintypes.HWND, ctypes.POINTER(WindowCompositionAttributes))
-                self.SetWindowCompositionAttribute.restype = wintypes.BOOL
+                try:
+                    self.SetWindowCompositionAttribute = self.user32.SetWindowCompositionAttribute
+                    self.SetWindowCompositionAttribute.argtypes = (wintypes.HWND, ctypes.POINTER(WindowCompositionAttributes))
+                    self.SetWindowCompositionAttribute.restype = wintypes.BOOL
+                except AttributeError:
+                    self.SetWindowCompositionAttribute = None
             else:
                 self.SetWindowCompositionAttribute = None
             # Enables dark context menu on window
@@ -79,7 +82,8 @@ class Theming:
         hwnd = int(win.winId())
         if not hwnd:
             return
-        self.AllowDarkModeForWindow(hwnd, True)
+        if self.AllowDarkModeForWindow:
+            self.AllowDarkModeForWindow(hwnd, True)
         if self.SetWindowCompositionAttribute:
             data = AccentPolicy(int(dark), 0, 0, 0)
             attr = WindowCompositionAttributes(26, ctypes.pointer(data), ctypes.sizeof(AccentPolicy))
