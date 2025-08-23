@@ -19,6 +19,7 @@ if sys.platform == 'win32':
         ]
 else:
     import darkdetect
+from PyQt6 import QtWidgets
 
 
 class Theming:
@@ -64,7 +65,9 @@ class Theming:
             if build_num >= 18362:
                 try:
                     self.SetWindowCompositionAttribute = self.user32.SetWindowCompositionAttribute
-                    self.SetWindowCompositionAttribute.argtypes = (wintypes.HWND, ctypes.POINTER(WindowCompositionAttributes))
+                    self.SetWindowCompositionAttribute.argtypes = (
+                        wintypes.HWND, ctypes.POINTER(WindowCompositionAttributes)
+                    )
                     self.SetWindowCompositionAttribute.restype = wintypes.BOOL
                 except AttributeError:
                     self.SetWindowCompositionAttribute = None

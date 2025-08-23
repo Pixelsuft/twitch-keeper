@@ -1,3 +1,5 @@
 QPushButton {
     border: 0px;
+    color: #ffffff;
+    outline: 0px;
 }
