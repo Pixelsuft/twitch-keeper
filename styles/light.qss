@@ -34,3 +34,7 @@ QLineEdit:disabled, QTimeEdit:disabled {
 QLabel {
     color: #000000;
 }
+
+QListWidget {
+    background-color: #eeeeee;
+}

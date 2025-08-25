@@ -34,15 +34,22 @@ class VodDown:
         self.win.setFixedSize(self.win.size())
         self.app.theming.init_on_window(self.win, self.app.dark)
         self.app.styling.apply_on_win(self.win, self.ui, self.app.dark)
+        self.ui.logList.setAutoScroll(True)
         self.ui.fetchButton.clicked.connect(self.fetch_info)
         # TODO: remove
         self.ui.urlEdit.setText('https://www.twitch.tv/videos/2548554034')
         self.win.show()
 
     def fetch_info(self) -> None:
-        url = self.ui.urlEdit.text().strip()
-        # TODO: vefiry id
-        vid_id = int(url.strip('/').split('/')[-1])
+        self.log_clear()
+        try:
+            url = self.ui.urlEdit.text().strip()
+            if 'twitch.tv/videos/' not in url:
+                raise RuntimeError('Incorrect twitch link')
+            vid_id = int(url.strip('/').split('/')[-1])
+        except Exception as err:
+            self.log_msg(f'Failed to get video ID: {err}')
+            return
         self.win.setWindowTitle('VOD Downloader')
         self.ui.startTime.setTime(QtCore.QTime(0, 0, 0))
         self.ui.endTime.setTime(QtCore.QTime(0, 0, 0))
@@ -53,18 +60,21 @@ class VodDown:
         self.fetcher.start()
 
     def on_fetch_info_progress(self, code: int, status: str, text: str) -> None:
-        print(f'TODO got message {code} {status}: {text}')
         if code == 0:
             self.locks -= 1
             self.set_info_enabled(True)
             if int(status) != 200:
+                self.log_msg(f'Twitch API request failed with status {status}: {text}')
                 return
             try:
-                data = json.loads(text)
-                title = str(data['data']['video']['title'])
-                length = int(data['data']['video']['lengthSeconds'])
+                data = json.loads(text)['data']
+                title = str(data['video']['title'])
+                length = int(data['video']['lengthSeconds'])
+                self.log_msg(f'Video title: {title}')
+                self.log_msg(f'Video length: {length}s')
+                self.log_msg(f'Video status: {data["video"]["status"]}')
             except Exception as err:
-                print('TODO err: ' + str(err))
+                self.log_msg(f'Failed to parse video info: {err}')
                 return
             self.win.setWindowTitle(title + ' [VOD Downloader]')
             self.ui.endTime.setTime(QtCore.QTime.fromMSecsSinceStartOfDay(length * 1000))
@@ -74,6 +84,15 @@ class VodDown:
         self.ui.fetchButton.setEnabled(enabled)
         self.ui.startTime.setEnabled(enabled)
         self.ui.endTime.setEnabled(enabled)
+        self.ui.chunkEdit.setEnabled(enabled)
+        self.ui.downButton.setEnabled(enabled)
+
+    def log_clear(self) -> None:
+        self.ui.logList.clear()
+
+    def log_msg(self, data: str) -> None:
+        self.ui.logList.addItem(data)
+        self.ui.logList.scrollToBottom()
 
     def close_event(self, ev: QtGui.QCloseEvent) -> None:
         if self.locks > 0:

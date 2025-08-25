@@ -7,3 +7,21 @@ QPushButton {
 QLineEdit, QTimeEdit {
     border: 2px solid #115ea3;
 }
+
+QProgressBar {
+    border: 2px solid #115ea3;
+    border-radius: 0px;
+}
+
+QProgressBar::chunk {
+    background-color: #22B14C;
+}
+
+QProgressBar::chunk:disabled {
+    background-color: #ED1C24;
+}
+
+QListWidget {
+    border: 2px solid #115ea3;
+    border-radius: 0px;
+}
