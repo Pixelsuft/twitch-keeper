@@ -18,6 +18,8 @@ class App:
         self.exit_code = 0
         self.app = QtWidgets.QApplication(args)
         self.cwd = os.path.dirname(__file__) or os.getcwd()
+        self.client_id = 'kimne78kx3ncx6brgo4mv6wki5h1ko'
+        self.oauth_token = ''
         self.forms = []
         self.theming = Theming()
         self.styling = Styling()
@@ -41,6 +43,14 @@ class App:
             ev.ignore()
             return
         ev.accept()
+
+    def get_default_headers(self) -> dict:
+        ret = {
+            'Client-ID': self.client_id
+        }
+        if self.oauth_token:
+            ret['Authorization'] = 'OAuth ' + self.oauth_token
+        return ret
 
     def run(self) -> None:
         # TODO: remove
