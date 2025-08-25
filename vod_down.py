@@ -67,7 +67,7 @@ class VodDown:
                 print('TODO err: ' + str(err))
                 return
             self.win.setWindowTitle(title + ' [VOD Downloader]')
-            self.ui.endTime.setTime(QtCore.QTime(length // 3600, (length // 60) % 60, length % 60))
+            self.ui.endTime.setTime(QtCore.QTime.fromMSecsSinceStartOfDay(length * 1000))
 
     def set_info_enabled(self, enabled: bool):
         self.ui.urlEdit.setEnabled(enabled)

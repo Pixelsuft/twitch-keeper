@@ -30,3 +30,7 @@ QLineEdit, QTimeEdit {
 QLineEdit:disabled, QTimeEdit:disabled {
     border-color: #3C3C3C;
 }
+
+QLabel {
+    color: #000000;
+}
