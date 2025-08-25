@@ -68,7 +68,7 @@
    <widget class="QTimeEdit" name="startTime">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>150</x>
       <y>60</y>
       <width>100</width>
       <height>40</height>
@@ -92,7 +92,7 @@
    <widget class="QTimeEdit" name="endTime">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>150</x>
       <y>110</y>
       <width>100</width>
       <height>40</height>
@@ -137,6 +137,45 @@
     </property>
     <property name="text">
      <string>End time:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="chunkEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>160</y>
+      <width>500</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>18</pointsize>
+     </font>
+    </property>
+    <property name="frame">
+     <bool>false</bool>
+    </property>
+    <property name="placeholderText">
+     <string>Chunk URL</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="downloadButton">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>160</y>
+      <width>110</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Download!</string>
     </property>
    </widget>
   </widget>
