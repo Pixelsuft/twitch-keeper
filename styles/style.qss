@@ -24,4 +24,5 @@ QProgressBar::chunk:disabled {
 QListWidget {
     border: 2px solid #115ea3;
     border-radius: 0px;
+    outline: 0px;
 }
