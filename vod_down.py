@@ -1,3 +1,4 @@
+import json
 import requests
 from PyQt6 import QtWidgets, QtGui, QtCore
 from ui_vod import Ui_VodDownloader
@@ -12,13 +13,12 @@ class InfoFetcher(QtCore.QThread):
         self.vid = 0
 
     def run(self) -> None:
-        data = '{"query":"query{video(id:\\"' + str(self.vid) + '\\"){title,thumbnailURLs(height:180,width:320),createdAt,lengthSeconds,owner{id,displayName,login},viewCount,game{id,displayName,boxArtURL},description,status}}","variables":{}}'
+        data = '{"query":"query{video(id:\\"' + str(self.vid) + '\\"){title,lengthSeconds,status}}","variables":{}}'
         try:
             resp = requests.post('https://gql.twitch.tv/gql', headers=self.headers, data=data)
+            self.progress.emit(0, str(resp.status_code), resp.content.decode('utf-8', errors='replace'))
         except Exception as err:
             self.progress.emit(0, '0', str(err))
-            return
-        self.progress.emit(0, str(resp.status_code), resp.text)
 
 
 class VodDown:
@@ -49,11 +49,20 @@ class VodDown:
         self.set_info_enabled(False)
         self.fetcher.start()
 
-    def on_fetch_info_progress(self, code: int, status: str, text: str):
+    def on_fetch_info_progress(self, code: int, status: str, text: str) -> None:
         print(f'TODO got message {code} {status}: {text}')
         if code == 0:
             self.locks -= 1
             self.set_info_enabled(True)
+            if int(status) != 200:
+                return
+            try:
+                data = json.loads(text)
+                title = str(data['data']['video']['title'])
+                length = int(data['data']['video']['lengthSeconds'])
+            except Exception as err:
+                print('TODO err: ' + str(err))
+                return
 
     def set_info_enabled(self, enabled: bool):
         self.ui.urlEdit.setEnabled(enabled)
