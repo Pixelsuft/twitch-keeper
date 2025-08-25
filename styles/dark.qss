@@ -35,6 +35,14 @@ QLabel {
     color: #ffffff;
 }
 
+QProgressBar {
+    background-color: #292929;
+}
+
 QListWidget {
     background-color: #292929;
+}
+
+QListWidget::item {
+    color: #ffffff;
 }
