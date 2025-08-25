@@ -22,11 +22,11 @@ QPushButton:disabled {
     background-color: #3C3C3C;
 }
 
-QLineEdit {
+QLineEdit, QTimeEdit {
     background-color: #ffffff;
     color: #000000;
 }
 
-QLineEdit:disabled {
+QLineEdit:disabled, QTimeEdit:disabled {
     border-color: #3C3C3C;
 }
