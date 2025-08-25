@@ -1,1 +1,2 @@
-[ ] PyQt5 compatibility
+[-] PyQt5 compatibility
+[-] Improve styles

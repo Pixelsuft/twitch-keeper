@@ -3,3 +3,7 @@ QPushButton {
     color: #ffffff;
     outline: 0px;
 }
+
+QLineEdit {
+    border: 2px solid #115ea3;
+}

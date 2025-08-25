@@ -43,6 +43,11 @@ class App:
         ev.accept()
 
     def run(self) -> None:
+        # TODO: remove
+        if 1:
+            self.spawn_vod()
+            self.exit_code = self.app.exec()
+            return
         self.main_win.show()
         self.exit_code = self.app.exec()
 

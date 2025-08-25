@@ -17,3 +17,7 @@ QPushButton:pressed {
 QPushButton:selected {
     background-color: #0f548c;
 }
+
+QLineEdit {
+    background-color: #ffffff;
+}
