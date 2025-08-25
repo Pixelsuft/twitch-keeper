@@ -97,6 +97,7 @@ class VodDown:
     def close_event(self, ev: QtGui.QCloseEvent) -> None:
         if self.locks > 0:
             ev.ignore()
+            self.log_msg('Can\'t close window because there are operations pending')
             return
         ev.accept()
         # TODO: remove
