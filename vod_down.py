@@ -30,32 +30,53 @@ class SingleDownloader(QtCore.QThread):
         self.headers = headers
         self.writer = writer
         self.chunk_url = chunk_url
-        self.mp4 = mp4  # TODO: False
+        self.mp4 = mp4
+        self.ext = 'mp4' if self.mp4 else 'ts'
         self.should_stop = False
         self.start_chunk = start_c
         self.end_chunk = end_c
 
     def run(self) -> None:
-        try:
-            data = requests.get(self.chunk_url + 'init-0.mp4', headers=self.headers)
-            if not data.status_code == 200:
-                raise RuntimeError(f'Request failed with status code {data.status_code}')
-            self.writer.write(data.content)
-        except Exception as err:
-            self.progress.emit(0, f'Failed get init video ({err})')
+        if self.mp4:
+            try:
+                data = requests.get(self.chunk_url + 'init-0.mp4', headers=self.headers)
+            except Exception as err:
+                self.progress.emit(0, f'Failed make request for init video ({err})')
+                return
+            if not data.status_code == 200 and not data.status_code == 403:
+                self.progress.emit(0, f'Request failed with status code {data.status_code}')
+            if data.status_code == 200:
+                self.writer.write(data.content)
+            else:
+                self.progress.emit(1, 'Failed to obtain .mp4 data, falling back to .ts format')
+                self.mp4 = False
+                self.ext = 'ts'
         cur = self.start_chunk
+        muted = ''
+        err_count = 0
         while cur < self.end_chunk:
             if self.should_stop:
                 self.progress.emit(0, 'Aborted by used')
                 return
+            if err_count >= 10:
+                self.progress.emit(0, 'Too many errors in a row')
+                return
             try:
-                data = requests.get(self.chunk_url + f'{cur}.mp4', headers=self.headers)
+                data = requests.get(self.chunk_url + f'{cur}{muted}.{self.ext}', headers=self.headers)
+                if data.status_code == 403:
+                    err_count += 1
+                    # Trying to autodetect muted segments
+                    self.progress.emit(1, f'Failed to download chunk {cur}{muted}.{self.ext}, trying to change muted/unmuted')
+                    muted = '' if muted else '-muted'
+                    continue
                 if not data.status_code == 200:
                     raise RuntimeError(f'Request failed with status code {data.status_code}')
                 self.writer.write(data.content)
             except Exception as err:
-                self.progress.emit(1, f'Failed to download chunk {cur}: {err}')
+                err_count += 1
+                self.progress.emit(1, f'Failed to download chunk {cur}{muted}.{self.ext}: {err}')
                 continue
+            err_count = 0
             cur += 1
             self.progress.emit(2, str(cur - self.start_chunk))
         self.progress.emit(0, 'Done')
@@ -92,7 +113,9 @@ class VodDown:
         self.log_clear()
         self.ui.downBar.setValue(0)
         try:
-            chunk_url = self.ui.chunkEdit.text()
+            chunk_url = self.ui.chunkEdit.text().strip()
+            if chunk_url.endswith('.ts') or chunk_url.endswith('.mp4'):
+                chunk_url = '/'.join(chunk_url.split('/')[:-1])
             if not chunk_url.endswith('/'):
                 chunk_url += '/'
             writer = SimpleWriter('test.mp4')
@@ -112,6 +135,7 @@ class VodDown:
             ec
         )
         self.downloader.writer = writer
+        self.log_msg(f'Chunk URL: {self.downloader.chunk_url}')
         self.log_msg(f'Start chunk: {self.downloader.start_chunk}')
         self.log_msg(f'End chunk: {self.downloader.end_chunk}')
         self.downloader.progress.connect(self.on_down_progress)
