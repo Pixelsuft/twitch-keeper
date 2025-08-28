@@ -116,6 +116,8 @@ class VodDown:
             chunk_url = self.ui.chunkEdit.text().strip()
             if chunk_url.endswith('.ts') or chunk_url.endswith('.mp4'):
                 chunk_url = '/'.join(chunk_url.split('/')[:-1])
+            if not chunk_url:
+                raise RuntimeError('Invalid chunk URL')
             if not chunk_url.endswith('/'):
                 chunk_url += '/'
             writer = SimpleWriter('test.mp4')

@@ -32,7 +32,7 @@
       <x>520</x>
       <y>10</y>
       <width>110</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
@@ -50,12 +50,12 @@
       <x>10</x>
       <y>10</y>
       <width>500</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>18</pointsize>
+      <pointsize>16</pointsize>
      </font>
     </property>
     <property name="frame">
@@ -68,15 +68,15 @@
    <widget class="QTimeEdit" name="startTime">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>60</y>
+      <x>110</x>
+      <y>50</y>
       <width>100</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>18</pointsize>
+      <pointsize>16</pointsize>
      </font>
     </property>
     <property name="frame">
@@ -92,15 +92,15 @@
    <widget class="QTimeEdit" name="endTime">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>110</y>
+      <x>110</x>
+      <y>90</y>
       <width>100</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>18</pointsize>
+      <pointsize>16</pointsize>
      </font>
     </property>
     <property name="frame">
@@ -117,10 +117,15 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>60</y>
-      <width>140</width>
-      <height>40</height>
+      <y>50</y>
+      <width>100</width>
+      <height>30</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Start time:</string>
@@ -130,10 +135,15 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>110</y>
-      <width>140</width>
-      <height>40</height>
+      <y>90</y>
+      <width>100</width>
+      <height>30</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>End time:</string>
@@ -143,14 +153,14 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>160</y>
-      <width>500</width>
-      <height>40</height>
+      <y>230</y>
+      <width>380</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>18</pointsize>
+      <pointsize>16</pointsize>
      </font>
     </property>
     <property name="frame">
@@ -163,10 +173,10 @@
    <widget class="QPushButton" name="downButton">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>160</y>
+      <x>400</x>
+      <y>230</y>
       <width>110</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
@@ -182,10 +192,15 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>210</y>
+      <y>270</y>
       <width>620</width>
-      <height>40</height>
+      <height>30</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
     </property>
     <property name="value">
      <number>0</number>
@@ -203,10 +218,10 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>260</y>
-      <width>620</width>
-      <height>40</height>
+      <x>520</x>
+      <y>230</y>
+      <width>110</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
@@ -215,7 +230,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Stop downloading</string>
+     <string>Stop</string>
     </property>
    </widget>
    <widget class="QListWidget" name="logList">
