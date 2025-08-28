@@ -81,3 +81,5 @@ cython_debug/
 *.DS_Store
 push.bat
 ui_*.py
+*.mp4
+*.ts

@@ -1,7 +1,9 @@
 import json
+import math
 import requests
 from PyQt6 import QtWidgets, QtGui, QtCore
 from ui_vod import Ui_VodDownloader
+from writer import SimpleWriter
 
 
 class InfoFetcher(QtCore.QThread):
@@ -20,6 +22,44 @@ class InfoFetcher(QtCore.QThread):
         except Exception as err:
             self.progress.emit(0, '0', str(err))
 
+class SingleDownloader(QtCore.QThread):
+    progress = QtCore.pyqtSignal(int, str)
+    
+    def __init__(self, headers: dict, writer, chunk_url: str, mp4: bool, start_c: int, end_c: int) -> None:
+        super().__init__()
+        self.headers = headers
+        self.writer = writer
+        self.chunk_url = chunk_url
+        self.mp4 = mp4  # TODO: False
+        self.should_stop = False
+        self.start_chunk = start_c
+        self.end_chunk = end_c
+
+    def run(self) -> None:
+        try:
+            data = requests.get(self.chunk_url + 'init-0.mp4', headers=self.headers)
+            if not data.status_code == 200:
+                raise RuntimeError(f'Request failed with status code {data.status_code}')
+            self.writer.write(data.content)
+        except Exception as err:
+            self.progress.emit(0, f'Failed get init video ({err})')
+        cur = self.start_chunk
+        while cur < self.end_chunk:
+            if self.should_stop:
+                self.progress.emit(0, 'Aborted by used')
+                return
+            try:
+                data = requests.get(self.chunk_url + f'{cur}.mp4', headers=self.headers)
+                if not data.status_code == 200:
+                    raise RuntimeError(f'Request failed with status code {data.status_code}')
+                self.writer.write(data.content)
+            except Exception as err:
+                self.progress.emit(1, f'Failed to download chunk {cur}: {err}')
+                continue
+            cur += 1
+            self.progress.emit(2, str(cur - self.start_chunk))
+        self.progress.emit(0, 'Done')
+
 
 class VodDown:
     def __init__(self, app):
@@ -27,6 +67,7 @@ class VodDown:
         self.locks = 0
         self.fetcher = InfoFetcher()
         self.fetcher.progress.connect(self.on_fetch_info_progress)
+        self.downloader = None
         self.win = QtWidgets.QMainWindow()
         self.win.closeEvent = self.close_event
         self.ui = Ui_VodDownloader()
@@ -36,9 +77,62 @@ class VodDown:
         self.app.styling.apply_on_win(self.win, self.ui, self.app.dark)
         self.ui.logList.setAutoScroll(True)
         self.ui.fetchButton.clicked.connect(self.fetch_info)
+        self.ui.downButton.clicked.connect(self.download)
+        self.ui.stopButton.clicked.connect(self.stop)
         # TODO: remove
-        self.ui.urlEdit.setText('https://www.twitch.tv/videos/2548554034')
+        self.ui.urlEdit.setText('https://www.twitch.tv/videos/2544331339?filter=archives&sort=time')
         self.win.show()
+
+    def stop(self) -> None:
+        self.ui.stopButton.setEnabled(False)
+        self.downloader.should_stop = True
+
+    def download(self) -> None:
+        chunk_size = 10
+        self.log_clear()
+        self.ui.downBar.setValue(0)
+        try:
+            chunk_url = self.ui.chunkEdit.text()
+            if not chunk_url.endswith('/'):
+                chunk_url += '/'
+            writer = SimpleWriter('test.mp4')
+        except Exception as err:
+            self.log_msg(f'Failed to prepare for writing: {err}')
+            return
+        sc = math.floor(self.ui.startTime.time().msecsSinceStartOfDay() / (1000 * chunk_size))
+        ec = math.ceil(self.ui.endTime.time().msecsSinceStartOfDay() / (1000 * chunk_size))
+        if ec <= sc:
+            ec = sc + 24 * 60 * 60 // chunk_size
+        self.downloader = SingleDownloader(
+            self.app.get_default_headers(),
+            writer,
+            chunk_url,
+            True,
+            sc,
+            ec
+        )
+        self.downloader.writer = writer
+        self.log_msg(f'Start chunk: {self.downloader.start_chunk}')
+        self.log_msg(f'End chunk: {self.downloader.end_chunk}')
+        self.downloader.progress.connect(self.on_down_progress)
+        self.locks += 1
+        self.set_info_enabled(False)
+        self.ui.stopButton.setEnabled(True)
+        self.ui.downBar.setMaximum(self.downloader.end_chunk - self.downloader.start_chunk)
+        self.downloader.start()
+
+    def on_down_progress(self, code: int, text: str) -> None:
+        if code == 0:
+            self.downloader.writer = None
+            self.downloader = None
+            self.locks -= 1
+            self.set_info_enabled(True)
+            self.ui.stopButton.setEnabled(False)
+            self.log_msg(f'Stopped for reason: {text}')
+        elif code == 1:
+            self.log_msg(text)
+        elif code == 2:
+            self.ui.downBar.setValue(int(text))
 
     def fetch_info(self) -> None:
         self.log_clear()
@@ -46,7 +140,7 @@ class VodDown:
             url = self.ui.urlEdit.text().strip()
             if 'twitch.tv/videos/' not in url:
                 raise RuntimeError('Incorrect twitch link')
-            vid_id = int(url.strip('/').split('/')[-1])
+            vid_id = int(url.split('?')[0].strip('/').split('/')[-1])
         except Exception as err:
             self.log_msg(f'Failed to get video ID: {err}')
             return
@@ -68,6 +162,8 @@ class VodDown:
                 return
             try:
                 data = json.loads(text)['data']
+                if data['video'] is None:
+                    raise RuntimeError('Video does not exist')
                 title = str(data['video']['title'])
                 length = int(data['video']['lengthSeconds'])
                 self.log_msg(f'Video title: {title}')
