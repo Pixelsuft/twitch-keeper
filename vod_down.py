@@ -1,9 +1,16 @@
 import json
 import math
+import os.path
+
+try:
+    import grequests
+    has_grequests = True
+except ImportError:
+    has_grequests = False
 import requests
 from PyQt6 import QtWidgets, QtGui, QtCore
 from ui_vod import Ui_VodDownloader
-from writer import SimpleWriter
+from writer import SimpleWriter, FFMPEGWriter
 
 
 class InfoFetcher(QtCore.QThread):
@@ -22,7 +29,7 @@ class InfoFetcher(QtCore.QThread):
         except Exception as err:
             self.progress.emit(0, '0', str(err))
 
-class SingleDownloader(QtCore.QThread):
+class DownloaderThread(QtCore.QThread):
     progress = QtCore.pyqtSignal(int, str)
     
     def __init__(self, headers: dict, writer, chunk_url: str, mp4: bool, start_c: int, end_c: int) -> None:
@@ -45,10 +52,13 @@ class SingleDownloader(QtCore.QThread):
                 return
             if not data.status_code == 200 and not data.status_code == 403:
                 self.progress.emit(0, f'Request failed with status code {data.status_code}')
-            if data.status_code == 200:
+            try:
+                if not data.status_code == 200:
+                    raise RuntimeError(f'Error status code {data.status_code}')
                 self.writer.write(data.content)
-            else:
-                self.progress.emit(1, 'Failed to obtain .mp4 data, falling back to .ts format')
+                self.progress.emit(1, 'Obtained .mp4 data')
+            except Exception as err:
+                self.progress.emit(1, f'Failed to obtain .mp4 data, falling back to .ts format ({err})')
                 self.mp4 = False
                 self.ext = 'ts'
         cur = self.start_chunk
@@ -100,6 +110,7 @@ class VodDown:
         self.ui.fetchButton.clicked.connect(self.fetch_info)
         self.ui.downButton.clicked.connect(self.download)
         self.ui.stopButton.clicked.connect(self.stop)
+        self.ui.ffmpegEdit.setText('ffmpeg -i pipe:0 %out%')
         # TODO: remove
         self.ui.urlEdit.setText('https://www.twitch.tv/videos/2544331339?filter=archives&sort=time')
         self.win.show()
@@ -120,7 +131,15 @@ class VodDown:
                 raise RuntimeError('Invalid chunk URL')
             if not chunk_url.endswith('/'):
                 chunk_url += '/'
-            writer = SimpleWriter('test.mp4')
+            out_path = self.ui.outEdit.text()
+            self.log_msg(f'Output path: {out_path}')
+            if not out_path.strip() or (os.path.exists(out_path) and not os.path.isfile(out_path)):
+                raise RuntimeError('Invalid output path')
+            ffmpeg_cmd = self.ui.ffmpegEdit.text()
+            enable_ffmpeg = bool(ffmpeg_cmd.strip())
+            if os.path.isfile(out_path):
+                os.remove(out_path)
+            writer = FFMPEGWriter(ffmpeg_cmd, out_path) if enable_ffmpeg else SimpleWriter(out_path)
         except Exception as err:
             self.log_msg(f'Failed to prepare for writing: {err}')
             return
@@ -128,7 +147,7 @@ class VodDown:
         ec = math.ceil(self.ui.endTime.time().msecsSinceStartOfDay() / (1000 * chunk_size))
         if ec <= sc:
             ec = sc + 24 * 60 * 60 // chunk_size
-        self.downloader = SingleDownloader(
+        self.downloader = DownloaderThread(
             self.app.get_default_headers(),
             writer,
             chunk_url,
@@ -208,6 +227,9 @@ class VodDown:
         self.ui.endTime.setEnabled(enabled)
         self.ui.chunkEdit.setEnabled(enabled)
         self.ui.downButton.setEnabled(enabled)
+        self.ui.outEdit.setEnabled(enabled)
+        self.ui.outButton.setEnabled(enabled)
+        self.ui.ffmpegEdit.setEnabled(enabled)
 
     def log_clear(self) -> None:
         self.ui.logList.clear()
