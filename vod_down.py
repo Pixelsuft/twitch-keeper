@@ -117,7 +117,7 @@ class DownloaderThread(QtCore.QThread):
                 if not arr:
                     break
                 to_write = b''
-                for data in grequests.imap(arr, size=len(arr)):
+                for data in grequests.map(arr):
                     if data.status_code == 403:
                         err_count += 1
                         # Trying to autodetect muted segments

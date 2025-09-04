@@ -50,10 +50,11 @@ class DownloaderThread(QtCore.QThread):
                         urls.append(i)
                     if i.startswith('#EXTINF:'):
                         next_dur = float(i[8:].split(',')[0])
+                    elif i.startswith('#EXT-X-TWITCH-PREFETCH:'):
+                        print(i[23:])
                     elif i.startswith('#EXT-X-TWITCH-LIVE-SEQUENCE:'):
                         cur_seq = int(i[28:])
                         if first:
-                            first = False
                             last_seq = cur_seq
                             self.progress.emit(1, f'First chunk: {cur_seq}')
                 delta = cur_seq - last_seq
@@ -61,21 +62,33 @@ class DownloaderThread(QtCore.QThread):
                     self.progress.emit(1, f'Underrun occurred ({delta - len(urls)} chunks)')
                     delta = len(urls)
                 elif delta == 0:
-                    self.progress.emit(1, f'Overrun occurred')
-                    time.sleep(2)
-                urls = urls[len(urls) - delta:]
+                    if first:
+                        delta = len(urls)
+                        first = False
+                    else:
+                        self.progress.emit(1, f'Overrun occurred')
+                        time.sleep(2)
+                        continue
+                urls = urls[-delta:]
                 if self.parallel:
                     content = b''
-                    for i in grequests.imap([grequests.get(x, headers=self.headers) for x in urls], size=len(urls)):
+                    for i in grequests.map([grequests.get(x, headers=self.headers) for x in urls]):
                         if i.status_code == 200:
-                            content += i.content
+                            self.writer.write(i.content)
                             self.total_seq += 1
                             self.progress.emit(2, str(self.total_seq % 30))
                         else:
                             self.progress.emit(1, f'Failed to fetch chunk with status code {i.status_code}')
-                    self.writer.write(content)
+                    # self.writer.write(content)
                 else:
-                    pass  # TODO
+                    for u in urls:
+                        i = requests.get(u, headers=self.headers)
+                        if i.status_code == 200:
+                            self.writer.write(i.content)
+                            self.total_seq += 1
+                            self.progress.emit(2, str(self.total_seq % 30))
+                        else:
+                            self.progress.emit(1, f'Failed to fetch chunk with status code {i.status_code}')
                 last_seq = cur_seq
             except Exception as err:
                 err_count += 1
@@ -153,7 +166,7 @@ class StreamDown:
             self.log_msg(text)
         elif code == 2:
             time_str = datetime.timedelta(seconds=self.downloader.total_seq * 2)
-            print(time_str)
+            # print(time_str)
             self.ui.downBar.setValue(int(text))
 
     def set_info_enabled(self, enabled: bool):
