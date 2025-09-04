@@ -29,6 +29,7 @@ class DownloaderThread(QtCore.QThread):
         first = True
         last_seq = 0
         err_count = 0
+        last_len = 0  # FIXME
         while True:
             if self.should_stop:
                 self.progress.emit(0, 'Aborted by user')
@@ -51,35 +52,41 @@ class DownloaderThread(QtCore.QThread):
                     if i.startswith('#EXTINF:'):
                         next_dur = float(i[8:].split(',')[0])
                     elif i.startswith('#EXT-X-TWITCH-PREFETCH:'):
-                        print(i[23:])
+                        pass
+                        # print(i[23:])
                     elif i.startswith('#EXT-X-TWITCH-LIVE-SEQUENCE:'):
                         cur_seq = int(i[28:])
                         if first:
                             last_seq = cur_seq
                             self.progress.emit(1, f'First chunk: {cur_seq}')
+                # print(len(urls))
                 delta = cur_seq - last_seq
                 if delta > len(urls):
                     self.progress.emit(1, f'Underrun occurred ({delta - len(urls)} chunks)')
                     delta = len(urls)
                 elif delta == 0:
                     if first:
-                        delta = len(urls)
+                        # delta = len(urls)
                         first = False
                     else:
                         self.progress.emit(1, f'Overrun occurred')
                         time.sleep(2)
                         continue
+                # FIXME: ???
+                delta += len(urls) - last_len
+                last_len = len(urls)
                 urls = urls[-delta:]
                 if self.parallel:
                     content = b''
                     for i in grequests.map([grequests.get(x, headers=self.headers) for x in urls]):
                         if i.status_code == 200:
-                            self.writer.write(i.content)
+                            # self.writer.write(i.content)
+                            content += i.content
                             self.total_seq += 1
                             self.progress.emit(2, str(self.total_seq % 30))
                         else:
                             self.progress.emit(1, f'Failed to fetch chunk with status code {i.status_code}')
-                    # self.writer.write(content)
+                    self.writer.write(content)
                 else:
                     for u in urls:
                         i = requests.get(u, headers=self.headers)
@@ -89,7 +96,8 @@ class DownloaderThread(QtCore.QThread):
                             self.progress.emit(2, str(self.total_seq % 30))
                         else:
                             self.progress.emit(1, f'Failed to fetch chunk with status code {i.status_code}')
-                last_seq = cur_seq
+                last_seq += delta
+                # last_seq = cur_seq
             except Exception as err:
                 err_count += 1
                 self.progress.emit(1, f'Failed to download data: {err}')
@@ -111,6 +119,9 @@ class StreamDown:
         self.ui.stopButton.clicked.connect(self.stop)
         self.ui.outButton.clicked.connect(self.select_out)
         self.ui.ffmpegEdit.setText('ffmpeg -i pipe:0 %out%')
+        # TODO: remove
+        self.ui.outEdit.setText('test.mp4')
+        self.ui.metaEdit.setText('https://eus21.playlist.ttvnw.net/v1/playlist/CsAIMbl4cO7T_R_4zw5ziKqGZEBskozXtZCzMJWvwF0BquSjvDkrxqCKFeWmo3y4qCRns7S9KsvM9KMvi1NOhLMG_tDExPblohCF5XMRUe2RLP7Jyi6-kRjoSmLdYbdN2x5KPfIuG33VL5OV-SZ5-z39rfa42cgk9sUb1o9roSE-sWbaGILUBpQcnqJvJh9_UXriKMZ0x-koTuo_5beX9neQW48FBJjBZzAARDKqnFJ61aseQfZJNZGXrzCb22ArnM54tCF4Axfw5QG22Ck4nQfLtsJIZ11z0kX_2qNyOzegbc579y6AMGs3Y2xJIqpLLXssx6T6AGsTrqoxf4u5DA1d6ywRjAV91LdaD5_PusgLHDJhXHmg3uxCQKKNJwkcwKpI-4a85APZiUKcQzU1R39-3wJIuCxllaXRccUK_hnaxRAH0tHln99QTCPI7JcXt9hPip9hDvmw6IU9iR9f8z8XmtCeDeqxeLNTjQ_YYQKh5RDM65KQ8uI5iHamDMJjX2-bTJKT_RmFoAjCHF33yIsGOmcdzBd1W5Fg-4-TIMQ3zsSLUWqXagFyIFFRpgQWnqi3V6wUslfumwzC2YDhnUWijVFsV5iW3e5cSLxMSMWshhEp9VhC1N7YkqV6IpYSbUYs2hqfNqA4Oql3eWA3UCvn9g-w55pM2OM2AUmIwpey2keIx0TSZQzSkJydkpJAafwOQ7dTgH1erEYf7Zbhnyl6XR-KF9dIRB-EYm_btgz6c0y1opRbgNpG4k8pFW_dJt6-SA1Ud8FjHl5LOxAXSD_UTJBsaCHHr32CJz-Wb9CZauXIirsV-mdh9kSa8rOO7dHTUVp1TSGTnRG9L_hDgHMM25XwjfbVTi8SWbQWa8zNJIggAVlBOwEVDOKevOwGsWUzyLjLGba0j0UJvCmJFL6Dh9onUq_K4_sHKCfl_XX5bC-mh5X2NCA0Yb_0GnkUpsTNrx1ZQ5Ka97lyl1ZkGps9PZrMKhnukOAElGGpVd6IQr3oYKKDK8IiCtNm2T8ICW4CTsFjLIGwVH1P6_jauW_6Rp0Jl1UKNSIEK-gbaWZX5-Ou99C0ynZr06_ri3mc0Pss4YFq4oGRk4YSEwSBPvNcCe-6vdSWV9Xz41i5JwTxs0y4X-1aPSggGGkAxxxh03Hldcfbt55zRaFNEIR08oALQcsWcPYJw9SL5zQrDjShjCMhF-reOP0occdn3IUzxh-784J6uUO93DQpfK7vit8i_w_w_CR76L4a4oKdIxI_fwjtAMI3D5qBWL2OAY-pO7eHAoR3lnF4fKHPdMe0Gf3DRh0CacJn2uNpnqufiymCMVXENg-5nNpZRZCId6XM1W2RU8EPD8PmP3s5iA_ezO2C1PAPAcgLgrYERodnarJDWEzPbdGXyINbr1hPGFV9N9h67I6uzlOPjZpYsH3bQwzGB8mbb0R4SvA6peZehFRZJgEaDCEJAhewLOgLVbaPvCABKglldS13ZXN0LTIwlA0.m3u8')
         self.win.show()
 
     def stop(self) -> None:
