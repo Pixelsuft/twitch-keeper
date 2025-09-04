@@ -3,7 +3,7 @@ import sys
 import json
 if 1 and os.getenv('PYCHARM_HOSTED') and int(os.environ['PYCHARM_HOSTED']):
     import subprocess
-    for i in ('main', 'vod', 'sets'):
+    for i in ('main', 'vod', 'sets', 'about'):
         if not os.path.isfile(f'ui_{i}.py') or os.path.getmtime(f'ui_{i}.py') < os.path.getmtime(f'ui/{i}.ui'):
             print(f'Rebuilding ui_{i}.py')
             subprocess.call(['pyuic6', '-o', f'ui_{i}.py', f'ui/{i}.ui'])
@@ -13,6 +13,7 @@ from styling import Styling
 from ui_main import Ui_MainWindow
 from vod_down import VodDown
 from settings import Settings
+from about import About
 
 
 class App:
@@ -43,6 +44,7 @@ class App:
         self.styling.apply_on_win(self.main_win, self.ui, self.dark)
         self.ui.vodButton.clicked.connect(self.spawn_vod)
         self.ui.settingsButton.clicked.connect(self.spawn_sets)
+        self.ui.aboutButton.clicked.connect(self.spawn_about)
 
     def spawn_vod(self) -> None:
         v = VodDown(self)
@@ -53,6 +55,12 @@ class App:
             return
         s = Settings(self)
         self.forms.append(s)
+
+    def spawn_about(self) -> None:
+        if any(type(x) == About for x in self.forms):
+            return
+        a = About(self)
+        self.forms.append(a)
 
     def close_event(self, ev: QtGui.QCloseEvent) -> None:
         if self.forms:
