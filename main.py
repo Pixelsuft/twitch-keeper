@@ -3,7 +3,7 @@ import sys
 import json
 if 1 and os.getenv('PYCHARM_HOSTED') and int(os.environ['PYCHARM_HOSTED']):
     import subprocess
-    for i in ('main', 'vod', 'sets', 'about'):
+    for i in ('main', 'vod', 'stream', 'sets', 'about'):
         if not os.path.isfile(f'ui_{i}.py') or os.path.getmtime(f'ui_{i}.py') < os.path.getmtime(f'ui/{i}.ui'):
             print(f'Rebuilding ui_{i}.py')
             subprocess.call(['pyuic6', '-o', f'ui_{i}.py', f'ui/{i}.ui'])
@@ -12,6 +12,7 @@ from theming import Theming
 from styling import Styling
 from ui_main import Ui_MainWindow
 from vod_down import VodDown
+from stream_down import StreamDown
 from settings import Settings
 from about import About
 
@@ -43,12 +44,17 @@ class App:
         self.styling.read_styles(os.path.join(self.cwd, 'styles'), not self.dark, self.dark)
         self.styling.apply_on_win(self.main_win, self.ui, self.dark)
         self.ui.vodButton.clicked.connect(self.spawn_vod)
+        self.ui.streamButton.clicked.connect(self.spawn_stream)
         self.ui.settingsButton.clicked.connect(self.spawn_sets)
         self.ui.aboutButton.clicked.connect(self.spawn_about)
 
     def spawn_vod(self) -> None:
         v = VodDown(self)
         self.forms.append(v)
+
+    def spawn_stream(self) -> None:
+        s = StreamDown(self)
+        self.forms.append(s)
 
     def spawn_sets(self) -> None:
         if any(type(x) == Settings for x in self.forms):
@@ -77,11 +83,6 @@ class App:
         return ret
 
     def run(self) -> None:
-        # TODO: remove
-        if 0:
-            self.spawn_sets()
-            self.exit_code = self.app.exec()
-            return
         self.main_win.show()
         self.exit_code = self.app.exec()
 

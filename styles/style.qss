@@ -26,3 +26,8 @@ QListWidget {
     border-radius: 0px;
     outline: 0px;
 }
+
+/* Maybe configure it from python?? */
+QPushButton, QLineEdit, QTimeEdit, QSpinBox, QProgressBar, QListWidget {
+    border-radius: 5px;
+}
