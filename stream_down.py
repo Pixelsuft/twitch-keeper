@@ -59,7 +59,7 @@ class DownloaderThread(QtCore.QThread):
                         if first:
                             last_seq = cur_seq
                             self.progress.emit(1, f'First chunk: {cur_seq}')
-                # print(len(urls))
+                print(len(urls))
                 delta = cur_seq - last_seq
                 # FIXME: ???
                 delta -= len(urls) - last_len
