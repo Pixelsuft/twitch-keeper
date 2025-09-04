@@ -73,7 +73,7 @@ class DownloaderThread(QtCore.QThread):
         err_count = 0
         while cur < self.end_chunk:
             if self.should_stop:
-                self.progress.emit(0, 'Aborted by used')
+                self.progress.emit(0, 'Aborted by user')
                 return
             if err_count >= 10:
                 self.progress.emit(0, 'Too many errors in a row')
@@ -194,6 +194,7 @@ class VodDown:
             writer = FFMPEGWriter(ffmpeg_cmd, out_path) if enable_ffmpeg else SimpleWriter(out_path)
         except Exception as err:
             self.log_msg(f'Failed to prepare for writing: {err}')
+            self.set_info_enabled(True)
             return
         sc = math.floor(self.ui.startTime.time().msecsSinceStartOfDay() / (1000 * chunk_size))
         ec = math.ceil(self.ui.endTime.time().msecsSinceStartOfDay() / (1000 * chunk_size))
@@ -228,7 +229,7 @@ class VodDown:
             self.locks -= 1
             self.set_info_enabled(True)
             self.ui.stopButton.setEnabled(False)
-            self.log_msg(f'Stopped for reason: {text}')
+            self.log_msg(f'Stop reason: {text}')
         elif code == 1:
             self.log_msg(text)
         elif code == 2:
