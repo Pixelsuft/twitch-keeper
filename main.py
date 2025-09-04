@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 if 1 and os.getenv('PYCHARM_HOSTED') and int(os.environ['PYCHARM_HOSTED']):
     import subprocess
     for i in ('main', 'vod', 'sets'):
@@ -19,9 +20,15 @@ class App:
         self.exit_code = 0
         self.app = QtWidgets.QApplication(args)
         self.cwd = os.path.dirname(__file__) or os.getcwd()
-        # TODO: use config.json file
         self.client_id = 'kimne78kx3ncx6brgo4mv6wki5h1ko'
         self.oauth_token = ''
+        self.conf_path = os.path.join(self.cwd, 'config.json')
+        if os.path.isfile(self.conf_path):
+            data = json.loads(open(self.conf_path, 'r', encoding='utf-8').read())
+            if data.get('client_id'):
+                self.client_id = data['client_id']
+            if data.get('oauth_token'):
+                self.oauth_token = data['oauth_token']
         self.forms = []
         self.theming = Theming()
         self.styling = Styling()

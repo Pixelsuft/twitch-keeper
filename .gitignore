@@ -80,6 +80,7 @@ cython_debug/
 .cursorindexingignore
 *.DS_Store
 push.bat
+config.json
 ui_*.py
 *.avi
 *.mkv

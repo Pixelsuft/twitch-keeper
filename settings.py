@@ -1,4 +1,5 @@
-from PyQt6 import QtWidgets, QtGui, QtCore
+import json
+from PyQt6 import QtWidgets, QtGui
 from ui_sets import Ui_SettingsWindow
 
 
@@ -30,6 +31,10 @@ class Settings:
 
     def save(self) -> None:
         self.apply()
+        open(self.app.conf_path, 'w', encoding='utf-8').write(json.dumps({
+            'client_id': self.app.client_id,
+            'oauth_token': self.app.oauth_token
+        }))
         self.win.close()
 
     def cancel(self) -> None:
