@@ -61,32 +61,32 @@ class DownloaderThread(QtCore.QThread):
                             self.progress.emit(1, f'First chunk: {cur_seq}')
                 # print(len(urls))
                 delta = cur_seq - last_seq
+                # FIXME: ???
+                delta -= len(urls) - last_len
+                last_len = len(urls)
                 if delta > len(urls):
                     self.progress.emit(1, f'Underrun occurred ({delta - len(urls)} chunks)')
                     delta = len(urls)
-                elif delta == 0:
+                elif delta <= 0:
                     if first:
-                        # delta = len(urls)
+                        delta = len(urls)
                         first = False
                     else:
                         self.progress.emit(1, f'Overrun occurred')
-                        time.sleep(2)
+                        time.sleep(1.5)
                         continue
-                # FIXME: ???
-                delta += len(urls) - last_len
-                last_len = len(urls)
                 urls = urls[-delta:]
                 if self.parallel:
-                    content = b''
+                    # content = b''
                     for i in grequests.map([grequests.get(x, headers=self.headers) for x in urls]):
                         if i.status_code == 200:
-                            # self.writer.write(i.content)
-                            content += i.content
+                            self.writer.write(i.content)
+                            # content += i.content
                             self.total_seq += 1
                             self.progress.emit(2, str(self.total_seq % 30))
                         else:
                             self.progress.emit(1, f'Failed to fetch chunk with status code {i.status_code}')
-                    self.writer.write(content)
+                    # self.writer.write(content)
                 else:
                     for u in urls:
                         i = requests.get(u, headers=self.headers)
