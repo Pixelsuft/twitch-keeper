@@ -4,7 +4,7 @@ QPushButton {
     outline: 0px;
 }
 
-QLineEdit, QTimeEdit {
+QLineEdit, QTimeEdit, QSpinBox {
     border: 2px solid #115ea3;
 }
 

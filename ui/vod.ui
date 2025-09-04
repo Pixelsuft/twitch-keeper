@@ -32,7 +32,7 @@
       <x>520</x>
       <y>10</y>
       <width>110</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -50,7 +50,7 @@
       <x>10</x>
       <y>10</y>
       <width>500</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -69,9 +69,9 @@
     <property name="geometry">
      <rect>
       <x>110</x>
-      <y>50</y>
+      <y>55</y>
       <width>100</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -93,9 +93,9 @@
     <property name="geometry">
      <rect>
       <x>110</x>
-      <y>90</y>
+      <y>100</y>
       <width>100</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -117,9 +117,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>50</y>
+      <y>55</y>
       <width>100</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -135,9 +135,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>90</y>
+      <y>100</y>
       <width>100</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -153,9 +153,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>230</y>
+      <y>235</y>
       <width>380</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -174,9 +174,9 @@
     <property name="geometry">
      <rect>
       <x>400</x>
-      <y>230</y>
+      <y>235</y>
       <width>110</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -192,9 +192,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>270</y>
+      <y>280</y>
       <width>620</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -219,9 +219,9 @@
     <property name="geometry">
      <rect>
       <x>520</x>
-      <y>230</y>
+      <y>235</y>
       <width>110</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -237,9 +237,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>310</y>
+      <y>325</y>
       <width>620</width>
-      <height>161</height>
+      <height>145</height>
      </rect>
     </property>
     <property name="font">
@@ -261,9 +261,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>130</y>
+      <y>145</y>
       <width>500</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -285,9 +285,9 @@
     <property name="geometry">
      <rect>
       <x>520</x>
-      <y>130</y>
+      <y>145</y>
       <width>110</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -303,9 +303,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>170</y>
-      <width>500</width>
-      <height>30</height>
+      <y>190</y>
+      <width>620</width>
+      <height>35</height>
      </rect>
     </property>
     <property name="font">
@@ -321,6 +321,45 @@
     </property>
     <property name="placeholderText">
      <string>FFmpeg cmdline</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="parSpin">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>55</y>
+      <width>80</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>18</pointsize>
+     </font>
+    </property>
+    <property name="buttonSymbols">
+     <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+    </property>
+    <property name="maximum">
+     <number>1000</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="parDownLabel">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>55</y>
+      <width>180</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Parallel Downloads:</string>
     </property>
    </widget>
   </widget>

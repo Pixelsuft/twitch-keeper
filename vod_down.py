@@ -1,9 +1,10 @@
 import json
 import math
-import os.path
-
+import os
+import time
+import datetime
 try:
-    import grequests
+    import grequests  # noqa
     has_grequests = True
 except ImportError:
     has_grequests = False
@@ -32,7 +33,7 @@ class InfoFetcher(QtCore.QThread):
 class DownloaderThread(QtCore.QThread):
     progress = QtCore.pyqtSignal(int, str)
     
-    def __init__(self, headers: dict, writer, chunk_url: str, mp4: bool, start_c: int, end_c: int) -> None:
+    def __init__(self, headers: dict, writer, chunk_url: str, mp4: bool, start_c: int, end_c: int, par: int) -> None:
         super().__init__()
         self.headers = headers
         self.writer = writer
@@ -42,8 +43,11 @@ class DownloaderThread(QtCore.QThread):
         self.should_stop = False
         self.start_chunk = start_c
         self.end_chunk = end_c
+        self.par = par
+        self.stime = 0
 
     def run(self) -> None:
+        self.stime = time.time()
         if self.mp4:
             try:
                 data = requests.get(self.chunk_url + 'init-0.mp4', headers=self.headers)
@@ -61,6 +65,9 @@ class DownloaderThread(QtCore.QThread):
                 self.progress.emit(1, f'Failed to obtain .mp4 data, falling back to .ts format ({err})')
                 self.mp4 = False
                 self.ext = 'ts'
+        if self.par > 0:
+            self.par_run()
+            return
         cur = self.start_chunk
         muted = ''
         err_count = 0
@@ -91,6 +98,47 @@ class DownloaderThread(QtCore.QThread):
             self.progress.emit(2, str(cur - self.start_chunk))
         self.progress.emit(0, 'Done')
 
+    def par_run(self) -> None:
+        cur = self.start_chunk
+        muted = ''
+        err_count = 0
+        while cur < self.end_chunk:
+            if self.should_stop:
+                self.progress.emit(0, 'Aborted by used')
+                return
+            if err_count >= 10:
+                self.progress.emit(0, 'Too many errors in a row')
+                return
+            try:
+                arr = [
+                    grequests.get(self.chunk_url + f'{i}{muted}.{self.ext}', headers=self.headers)
+                    for i in range(cur, min(self.end_chunk, cur + self.par))
+                ]
+                if not arr:
+                    break
+                to_write = b''
+                for data in grequests.imap(arr, size=len(arr)):
+                    if data.status_code == 403:
+                        err_count += 1
+                        # Trying to autodetect muted segments
+                        self.progress.emit(1, f'Failed to download chunk {cur}{muted}.{self.ext}, trying to change muted/unmuted')
+                        muted = '' if muted else '-muted'
+                        break
+                    if not data.status_code == 200:
+                        raise RuntimeError(f'Request failed with status code {data.status_code}')
+                    to_write += data.content
+                    cur += 1
+                else:
+                    err_count = 0
+                    self.progress.emit(2, str(cur - self.start_chunk))
+                if to_write:
+                    self.writer.write(to_write)
+            except Exception as err:
+                err_count += 1
+                self.progress.emit(1, f'Failed to download chunks from {cur}{muted}.{self.ext}: {err}')
+                continue
+        self.progress.emit(0, 'Done')
+
 
 class VodDown:
     def __init__(self, app):
@@ -108,11 +156,11 @@ class VodDown:
         self.app.styling.apply_on_win(self.win, self.ui, self.app.dark)
         self.ui.logList.setAutoScroll(True)
         self.ui.fetchButton.clicked.connect(self.fetch_info)
-        self.ui.downButton.clicked.connect(self.download)
+        self.ui.downButton.clicked.connect( self.download)
         self.ui.stopButton.clicked.connect(self.stop)
+        self.ui.parSpin.setValue(10 if has_grequests else 0)
+        self.ui.parSpin.setEnabled(has_grequests)
         self.ui.ffmpegEdit.setText('ffmpeg -i pipe:0 %out%')
-        # TODO: remove
-        self.ui.urlEdit.setText('https://www.twitch.tv/videos/2544331339?filter=archives&sort=time')
         self.win.show()
 
     def stop(self) -> None:
@@ -153,7 +201,8 @@ class VodDown:
             chunk_url,
             True,
             sc,
-            ec
+            ec,
+            self.ui.parSpin.value()
         )
         self.downloader.writer = writer
         self.log_msg(f'Chunk URL: {self.downloader.chunk_url}')
@@ -168,6 +217,8 @@ class VodDown:
 
     def on_down_progress(self, code: int, text: str) -> None:
         if code == 0:
+            now = time.time()
+            self.log_msg(f'Finished in: {datetime.timedelta(seconds=now - self.downloader.stime)}')
             self.downloader.writer = None
             self.downloader = None
             self.locks -= 1
@@ -230,6 +281,7 @@ class VodDown:
         self.ui.outEdit.setEnabled(enabled)
         self.ui.outButton.setEnabled(enabled)
         self.ui.ffmpegEdit.setEnabled(enabled)
+        self.ui.parSpin.setEnabled(enabled and has_grequests)
 
     def log_clear(self) -> None:
         self.ui.logList.clear()

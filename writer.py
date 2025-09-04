@@ -1,6 +1,4 @@
-import os
 import subprocess
-import signal
 
 class SimpleWriter:
     def __init__(self, path: str) -> None:
