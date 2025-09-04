@@ -18,7 +18,11 @@ if sys.platform == 'win32':
             ("SizeOfData", wintypes.ULONG),
         ]
 else:
-    import darkdetect
+    try:
+        import darkdetect
+        has_dd = True
+    except ImportError:
+        has_dd = False
 from PyQt6 import QtWidgets
 
 
@@ -94,6 +98,8 @@ class Theming:
 
     def is_dark(self) -> bool:
         if not sys.platform == 'win32':
+            if not has_dd:
+                return False
             return darkdetect.isDark()
         if self.ShouldAppsUseDarkMode:
             return self.ShouldAppsUseDarkMode()
