@@ -19,7 +19,7 @@ if sys.platform == 'win32':
         ]
 else:
     try:
-        import darkdetect
+        import darkdetect  # noqa
         has_dd = True
     except ImportError:
         has_dd = False
@@ -83,7 +83,7 @@ class Theming:
             if self.SetPreferredAppMode:
                 self.SetPreferredAppMode(1)
 
-    def init_on_window(self, win: any, dark: bool) -> None:
+    def init_on_window(self, win, dark: bool) -> None:
         if not sys.platform == 'win32':
             return
         hwnd = int(win.winId())

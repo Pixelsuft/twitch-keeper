@@ -156,8 +156,9 @@ class VodDown:
         self.app.styling.apply_on_win(self.win, self.ui, self.app.dark)
         self.ui.logList.setAutoScroll(True)
         self.ui.fetchButton.clicked.connect(self.fetch_info)
-        self.ui.downButton.clicked.connect( self.download)
+        self.ui.downButton.clicked.connect(self.download)
         self.ui.stopButton.clicked.connect(self.stop)
+        self.ui.outButton.clicked.connect(self.select_out)
         self.ui.parSpin.setValue(10 if has_grequests else 0)
         self.ui.parSpin.setEnabled(has_grequests)
         self.ui.ffmpegEdit.setText('ffmpeg -i pipe:0 %out%')
@@ -289,6 +290,10 @@ class VodDown:
     def log_msg(self, data: str) -> None:
         self.ui.logList.addItem(data)
         self.ui.logList.scrollToBottom()
+
+    def select_out(self) -> None:
+        ret = QtWidgets.QFileDialog.getSaveFileName(self.win, 'Select output video path', None)
+        self.ui.outEdit.setText(ret[0] or '')
 
     def close_event(self, ev: QtGui.QCloseEvent) -> None:
         if self.locks > 0:
