@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>VodDownloader</class>
- <widget class="QMainWindow" name="VodDownloader">
+ <class>VodDownloaderWindow</class>
+ <widget class="QMainWindow" name="VodDownloaderWindow">
   <property name="geometry">
    <rect>
     <x>0</x>

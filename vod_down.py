@@ -10,7 +10,7 @@ except ImportError:
     has_grequests = False
 import requests
 from PyQt6 import QtWidgets, QtGui, QtCore
-from ui_vod import Ui_VodDownloader
+from ui_vod import Ui_VodDownloaderWindow
 from writer import SimpleWriter, FFMPEGWriter
 
 
@@ -131,6 +131,9 @@ class DownloaderThread(QtCore.QThread):
                 else:
                     err_count = 0
                     self.progress.emit(2, str(cur - self.start_chunk))
+                if self.should_stop:
+                    self.progress.emit(0, 'Aborted by used')
+                    return
                 if to_write:
                     self.writer.write(to_write)
             except Exception as err:
@@ -149,7 +152,7 @@ class VodDown:
         self.downloader = None
         self.win = QtWidgets.QMainWindow()
         self.win.closeEvent = self.close_event
-        self.ui = Ui_VodDownloader()
+        self.ui = Ui_VodDownloaderWindow()
         self.ui.setupUi(self.win)
         self.win.setFixedSize(self.win.size())
         self.app.theming.init_on_window(self.win, self.app.dark)
@@ -301,8 +304,5 @@ class VodDown:
             self.log_msg('Can\'t close window because there are operations pending')
             return
         ev.accept()
-        # TODO: remove
-        if 1:
-            return
         self.app.forms.remove(self)
         self.app = None
