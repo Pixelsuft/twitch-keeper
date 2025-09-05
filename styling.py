@@ -18,5 +18,5 @@ class Styling:
             self.style_dark = open(os.path.join(path, 'dark.qss'), 'r', encoding='utf-8').read()
 
     def apply_on_win(self, win, ui, is_dark: bool) -> None:
-        ui.centralwidget.setStyle(QtWidgets.QStyleFactory.create('windowsvista'))
+        # ui.centralwidget.setStyle(QtWidgets.QStyleFactory.create('windowsvista'))
         win.setStyleSheet(self.style + (self.style_dark if is_dark else self.style_light))

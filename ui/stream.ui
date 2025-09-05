@@ -41,13 +41,13 @@
      </font>
     </property>
     <property name="text">
-     <string>Metadata URL</string>
+     <string/>
     </property>
     <property name="frame">
      <bool>false</bool>
     </property>
     <property name="placeholderText">
-     <string>Chunk URL</string>
+     <string>Metadata URL</string>
     </property>
    </widget>
    <widget class="QPushButton" name="downButton">
