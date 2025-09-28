@@ -20,7 +20,15 @@ def has_nvidia() -> bool:
     return bool(_has_nvidia_cache)
 
 def get_default_ffmpeg_cmd(is_stream: bool) -> str:
-    return 'ffmpeg -c:v h264_nvenc -i pipe:0 %out%' if has_nvidia() else 'ffmpeg -i pipe:0 %out%'
+    ret = 'ffmpeg -i pipe:0 -c:a copy'
+    if has_nvidia():
+        ret += ' -c:v h264_nvenc'
+    elif is_stream:
+        ret += ' -vf \'format=nv12,hwupload\' -c:v h264_vaapi'
+    else:
+        ret += ' -c:v libx264 -threads 0'
+    ret += ' %out%'
+    return ret
 
 class SimpleWriter:
     def __init__(self, path: str) -> None:
