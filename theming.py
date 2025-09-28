@@ -23,7 +23,6 @@ else:
         has_dd = True
     except ImportError:
         has_dd = False
-from PyQt6 import QtWidgets
 
 
 class Theming:
@@ -34,13 +33,13 @@ class Theming:
             self.user32 = ctypes.windll.user32
             if build_num >= 17763:
                 try:
-                    self.ShouldAppsUseDarkMode = self.ux_theme.__getitem__(132)
+                    self.ShouldAppsUseDarkMode = self.ux_theme.__getitem__(132)  # noqa
                     self.ShouldAppsUseDarkMode.argtypes = ()
                     self.ShouldAppsUseDarkMode.restype = ctypes.c_bool
                 except AttributeError:
                     self.ShouldAppsUseDarkMode = None
                 try:
-                    self.AllowDarkModeForWindow = self.ux_theme.__getitem__(133)
+                    self.AllowDarkModeForWindow = self.ux_theme.__getitem__(133)  # noqa
                     self.AllowDarkModeForWindow.argtypes = (wintypes.HWND, ctypes.c_bool)
                     self.AllowDarkModeForWindow.restype = None
                 except AttributeError:
@@ -50,7 +49,7 @@ class Theming:
                 self.AllowDarkModeForWindow = None
             if 17763 <= build_num < 18362:
                 try:
-                    self.AllowDarkModeForApp = self.ux_theme.__getitem__(135)
+                    self.AllowDarkModeForApp = self.ux_theme.__getitem__(135)  # noqa
                     self.AllowDarkModeForApp.argtypes = ()
                     self.AllowDarkModeForApp.restype = None
                 except AttributeError:
@@ -59,7 +58,7 @@ class Theming:
                 self.AllowDarkModeForApp = None
             if build_num >= 18362:
                 try:
-                    self.SetPreferredAppMode = self.ux_theme.__getitem__(135)
+                    self.SetPreferredAppMode = self.ux_theme.__getitem__(135)  # noqa
                     self.SetPreferredAppMode.argtypes = (ctypes.c_int, )
                     self.SetPreferredAppMode.restype = ctypes.c_int
                 except AttributeError:
@@ -68,7 +67,7 @@ class Theming:
                 self.SetPreferredAppMode = None
             if build_num >= 18362:
                 try:
-                    self.SetWindowCompositionAttribute = self.user32.SetWindowCompositionAttribute
+                    self.SetWindowCompositionAttribute = self.user32.SetWindowCompositionAttribute  # noqa
                     self.SetWindowCompositionAttribute.argtypes = (
                         wintypes.HWND, ctypes.POINTER(WindowCompositionAttributes)
                     )

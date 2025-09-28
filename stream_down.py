@@ -20,7 +20,7 @@ class DownloaderThread(QtCore.QThread):
         self.writer = writer
         self.meta_url = meta_url
         self.should_stop = False
-        self.parallel = has_grequests  # TODO
+        self.parallel = has_grequests
         self.stime = 0
         self.total_seq = 0
 
@@ -75,12 +75,12 @@ class DownloaderThread(QtCore.QThread):
                 urls = urls[-need_count:]
                 if self.parallel:
                     # content = b''
-                    wt = 0
+                    # wt = 0
                     for i in grequests.map([grequests.get(x, headers=self.headers) for x in urls]):
                         if i.status_code == 200:
-                            st = time.time()
+                            # st = time.time()
                             self.writer.write(i.content)
-                            wt += time.time() - st
+                            # wt += time.time() - st
                             # content += i.content
                             self.total_seq += 1
                             self.progress.emit(2, str(self.total_seq % 30))
