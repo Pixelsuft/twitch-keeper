@@ -1,4 +1,5 @@
 import subprocess
+import threading
 
 class SimpleWriter:
     def __init__(self, path: str) -> None:
@@ -29,14 +30,7 @@ class FFMPEGWriter:
             raise RuntimeError(err)
 
     def write(self, data: bytes) -> None:
-        if 1:
-            self.direct_write(data)
-        else:
-            if len(self.buffer) < 1024 * 1024 * 10:
-                self.buffer += data
-                return
-            self.direct_write(self.buffer)
-            self.buffer = b''
+        self.direct_write(data)
 
     def __del__(self) -> None:
         if self.proc.poll() is None:

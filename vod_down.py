@@ -9,7 +9,7 @@ try:
 except ImportError:
     has_grequests = False
 import requests
-from PyQt6 import QtWidgets, QtGui, QtCore
+from ui_main import QtWidgets, QtGui, QtCore
 from ui_vod import Ui_VodDownloaderWindow
 from writer import SimpleWriter, FFMPEGWriter
 

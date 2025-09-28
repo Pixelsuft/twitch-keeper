@@ -206,6 +206,42 @@
      <string>FFmpeg cmdline</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="parBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>145</y>
+      <width>371</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>18</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Parallel downloading</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="threadBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>190</y>
+      <width>371</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>18</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Run FFmpeg in separate thread</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

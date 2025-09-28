@@ -1,5 +1,5 @@
 import json
-from PyQt6 import QtWidgets, QtGui
+from ui_main import QtWidgets, QtGui
 from ui_sets import Ui_SettingsWindow
 
 

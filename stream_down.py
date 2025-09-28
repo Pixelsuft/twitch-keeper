@@ -7,7 +7,7 @@ try:
 except ImportError:
     has_grequests = False
 import requests
-from PyQt6 import QtWidgets, QtGui, QtCore
+from ui_main import QtWidgets, QtGui, QtCore
 from ui_stream import Ui_StreamDownloaderWindow
 from writer import SimpleWriter, FFMPEGWriter
 
@@ -72,6 +72,7 @@ class DownloaderThread(QtCore.QThread):
                         time.sleep(1.5)
                         continue
                 first = False
+                # print(len(urls), cur_down, need_count)
                 urls = urls[-need_count:]
                 if self.parallel:
                     # content = b''
@@ -116,6 +117,9 @@ class StreamDown:
         self.ui.stopButton.clicked.connect(self.stop)
         self.ui.outButton.clicked.connect(self.select_out)
         self.ui.ffmpegEdit.setText('ffmpeg -i pipe:0 %out%')
+        # TODO: remove
+        self.ui.outEdit.setText('test.mp4')
+        self.ui.metaEdit.setText('https://euw11.playlist.ttvnw.net/v1/playlist/Cr8Ie-9S7gwsXhIFoYHdNAzvL7UAoeqjtnLcNluHZg9XycfpVe4yoJLzZGgDH2A5AjQHm1oVjkrVz3eCqA5Lm3glVwCeMT5TlrkxEfv1naSBcgH7EEu62-8U_oNTI1C1yvbRuDR_NDozXsTeDLDV_SEB6fTZJvrmNHDYRZbsFc7qvf27vams6qSEUyqwX-f1J7EdR_aJg3j47C6r8_LaFpwxikBuQYBSFn4tX2z1AA3NSY6efV_HWVLF_v1yiPEs5CQfCn52_i7roilGh8YfS8wVnZVoNxf-RgQWc_bQS8PqCt77hBSnwIhqXdBVAv-XcWbZ17a_6Pa2ja0qyzjhWO7U7flQd8a9Gb6Y9ZR3-Xcz8aIj9s9PQVhgz1DYv2GCh398iZWcz1x82FzpviY5Mcv3yd2LRzImkr-py94CiP5q8E8X0OI0N6WqKIg9VcLdA3_y1yYCtLeeZkLJkw-iCWl8JgS35WzbI1MTbNk6x41TwLcwT2R4vLUFIP60mIdVjZdEGlrSD-XNXiCfbJFg-BN1hoqfYF-5whmGv9p_nSZu9Fx5H3meTjtYTiDGBvcaQ45cwFp513uUC66w4nW6nFvLa5hF7oaN6TEL8CiN_0_UiBUFN0Na_62mz9Fc8axidmzT7hG1KnFyK5ZdUGXzJ3eu24FA1Ram5n42gETTM3wcOJC1OJVNjZUZX3Iu2A5K1bfz-84y1StLB15uT5RLHbpnHIZfBGzZnzpDn4Yj9BZpsd1i6WHPOON7Rx-8XcOP9oMJ1u4JDkWJAj377BjSFp9CugeaQikv8aCYM_ttJKER1zHokYK78sPBKD1LYCYtBz6ziLXPDIqQp6hJJIFGiFtpemp9-mXFR-A8rrBXGyMn7f9bktgtUkC-vnQQUEI7GNuLO3LZOoSK80JIsgiuwIxG7E-IoecwIaRL_vgPE9QX_WHv-PaAHAc7urPZwicryZDehANRQWCAIJYYG6vAkrUiRPD-ePZToMB1Lp2AodUjMIQHNe9wuOk-IxMo3iJhoHa2f0SQpDEr8idykEdCW8pNnogZl-U4C7BrugIuQiff-XN0gBKzUWOeg_1D4_3aR1Blc4sC0BcqKuLJadH3RR6UA6-QLi8RBSWcU7vfjCt-uQZNQSZS65IP_kB-RgvT16NQrb3qz2YrTjfE0iLlS0MeR0cLobGK5G_erx34eO3hpmo5c450T-LMtKlisAHpvABpj0KQEWufe8H8VmY2SUE2wCN_s62OAAx8LZOKZRJspq4aMnuHRsg5AtxNKA64oc5dYX28tcuodCiYtdNkXJFE3vQYYP59cmtNdMNF1XRtkjaiD7DwkL-waRI1s4MpxpTV0kRvZoP-yvVpZiMZPKqp6DGFA8Lcl58IkeTVIuZYxEmN5hcIgbgp0cJc614-lniCuv9Bk5hd0MGANVcfQOcn52uiJh9Ys13TAsnKJdp-gBoM0tYKDa2UjJkGWPYEIAEqCWV1LXdlc3QtMjCVDQ.m3u8')
         self.win.show()
 
     def stop(self) -> None:
@@ -153,6 +157,7 @@ class StreamDown:
         self.downloader.progress.connect(self.on_down_progress)
         self.set_info_enabled(False)
         self.ui.stopButton.setEnabled(True)
+        self.locks += 1
         self.downloader.start()
 
     def on_down_progress(self, code: int, text: str) -> None:

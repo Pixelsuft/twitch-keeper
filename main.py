@@ -7,10 +7,9 @@ if 1 and os.getenv('PYCHARM_HOSTED') and int(os.environ['PYCHARM_HOSTED']):
         if not os.path.isfile(f'ui_{i}.py') or os.path.getmtime(f'ui_{i}.py') < os.path.getmtime(f'ui/{i}.ui'):
             print(f'Rebuilding ui_{i}.py')
             subprocess.call(['pyuic6', '-o', f'ui_{i}.py', f'ui/{i}.ui'])
-from PyQt6 import QtWidgets, QtGui
+from ui_main import QtWidgets, QtGui, Ui_MainWindow
 from theming import Theming
 from styling import Styling
-from ui_main import Ui_MainWindow
 from vod_down import VodDown
 from stream_down import StreamDown
 from settings import Settings

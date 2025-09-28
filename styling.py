@@ -1,5 +1,5 @@
 import os
-from PyQt6 import QtWidgets
+from ui_main import QtWidgets
 
 
 class Styling:
