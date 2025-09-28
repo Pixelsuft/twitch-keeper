@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, QtGui
+from ui_main import QtWidgets, QtGui
 from ui_about import Ui_AboutWindow
 
 

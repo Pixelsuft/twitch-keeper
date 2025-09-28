@@ -31,7 +31,7 @@ QLineEdit:disabled, QTimeEdit:disabled, QSpinBox:disabled {
     border-color: #3C3C3C;
 }
 
-QLabel {
+QLabel, QCheckBox {
     color: #000000;
 }
 
