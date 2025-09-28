@@ -1,9 +1,6 @@
 import os
 import time
 import datetime
-
-import writer
-
 try:
     import grequests  # noqa
     has_grequests = True
@@ -12,7 +9,7 @@ except ImportError:
 import requests
 from ui_main import QtWidgets, QtGui, QtCore
 from ui_stream import Ui_StreamDownloaderWindow
-from writer import SimpleWriter, FFMPEGWriter
+from writer import SimpleWriter, FFMPEGWriter, get_default_ffmpeg_cmd
 
 class DownloaderThread(QtCore.QThread):
     progress = QtCore.pyqtSignal(int, str)
@@ -122,7 +119,7 @@ class StreamDown:
         self.ui.downButton.clicked.connect(self.download)
         self.ui.stopButton.clicked.connect(self.stop)
         self.ui.outButton.clicked.connect(self.select_out)
-        self.ui.ffmpegEdit.setText(writer.get_default_ffmpeg_cmd(True))
+        self.ui.ffmpegEdit.setText(get_default_ffmpeg_cmd(True))
         self.win.show()
 
     def stop(self) -> None:

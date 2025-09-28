@@ -11,7 +11,7 @@ except ImportError:
 import requests
 from ui_main import QtWidgets, QtGui, QtCore
 from ui_vod import Ui_VodDownloaderWindow
-from writer import SimpleWriter, FFMPEGWriter
+from writer import SimpleWriter, FFMPEGWriter, get_default_ffmpeg_cmd
 
 
 class InfoFetcher(QtCore.QThread):
@@ -164,7 +164,7 @@ class VodDown:
         self.ui.outButton.clicked.connect(self.select_out)
         self.ui.parSpin.setValue(10 if has_grequests else 0)
         self.ui.parSpin.setEnabled(has_grequests)
-        self.ui.ffmpegEdit.setText(writer.get_default_ffmpeg_cmd(False))
+        self.ui.ffmpegEdit.setText(get_default_ffmpeg_cmd(False))
         self.win.show()
 
     def stop(self) -> None:
