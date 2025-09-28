@@ -7,6 +7,11 @@ A simple Twitch VOD/Stream Downloader written in Python
  - [darkdetect](https://github.com/albertosottile/darkdetect) (recommended on non-win32 platforms)
 ## Running
 ```shell
-python build_ui.py [--qt5]
+python build_ui.py
 python main.py
 ```
+## Obtaining VOD chunk URL
+1) Open needed VOD in browser
+2) Set needed quality
+3) Open network section in dev tools
+4) Find a request to URL something like 123.ts or 456.mp4 and copy that URL

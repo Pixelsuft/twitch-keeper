@@ -1,8 +1,11 @@
 import os
 import sys
 import subprocess
-
-is_qt6 = not any(x.lower() == '--qt5' for x in sys.argv[1:])
+try:
+    from PyQt6 import QtWidgets  # noqa
+    is_qt6 = not any(x.lower() == '--qt5' for x in sys.argv[1:])
+except ImportError:
+    is_qt6 = False
 
 for i in ('main', 'vod', 'stream', 'sets', 'about'):
     if os.path.isfile(f'ui_{i}.py'):
