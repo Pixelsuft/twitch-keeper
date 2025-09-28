@@ -164,7 +164,7 @@ class VodDown:
         self.ui.outButton.clicked.connect(self.select_out)
         self.ui.parSpin.setValue(10 if has_grequests else 0)
         self.ui.parSpin.setEnabled(has_grequests)
-        self.ui.ffmpegEdit.setText('ffmpeg -i pipe:0 %out%')
+        self.ui.ffmpegEdit.setText(writer.get_default_ffmpeg_cmd(False))
         self.win.show()
 
     def stop(self) -> None:

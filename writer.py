@@ -1,6 +1,27 @@
 import subprocess
 import threading
 
+_has_nvidia_cache = -1
+
+def has_nvidia() -> bool:
+    global _has_nvidia_cache
+    if _has_nvidia_cache == -1:
+        try:
+            _has_nvidia_cache = subprocess.call(
+                ['nvidia-smi'],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL
+            ) == 0
+        except Exception as _err:
+            if _err:
+                pass
+            _has_nvidia_cache = False
+    return bool(_has_nvidia_cache)
+
+def get_default_ffmpeg_cmd(is_stream: bool) -> str:
+    return 'ffmpeg -c:v h264_nvenc -i pipe:0 %out%' if has_nvidia() else 'ffmpeg -i pipe:0 %out%'
+
 class SimpleWriter:
     def __init__(self, path: str) -> None:
         self.file = open(path, 'wb')

@@ -1,6 +1,9 @@
 import os
 import time
 import datetime
+
+import writer
+
 try:
     import grequests  # noqa
     has_grequests = True
@@ -57,7 +60,7 @@ class DownloaderThread(QtCore.QThread):
                         cur_seq = int(i[28:])
                         if first:
                             cur_down = cur_seq
-                            self.progress.emit(1, f'First chunk: {cur_seq}')
+                            self.progress.emit(1, f'First chunk: {cur_down}')
                 need_count = cur_seq + len(urls) - cur_down
                 if need_count > len(urls):
                     self.progress.emit(1, f'Underrun occurred ({need_count - len(urls)} chunks)')
@@ -72,18 +75,21 @@ class DownloaderThread(QtCore.QThread):
                         time.sleep(1.5)
                         continue
                 first = False
-                # print(len(urls), cur_down, need_count)
                 urls = urls[-need_count:]
                 if self.parallel:
                     # content = b''
+                    wt = 0
                     for i in grequests.map([grequests.get(x, headers=self.headers) for x in urls]):
                         if i.status_code == 200:
+                            st = time.time()
                             self.writer.write(i.content)
+                            wt += time.time() - st
                             # content += i.content
                             self.total_seq += 1
                             self.progress.emit(2, str(self.total_seq % 30))
                         else:
                             self.progress.emit(1, f'Failed to fetch chunk with status code {i.status_code}')
+                    # print(f'Time taken: {wt}s')
                     # self.writer.write(content)
                 else:
                     for u in urls:
@@ -98,7 +104,7 @@ class DownloaderThread(QtCore.QThread):
                 # last_seq = cur_seq
             except Exception as err:
                 err_count += 1
-                self.progress.emit(1, f'Failed to download data: {err}')
+                self.progress.emit(1, f'Failed to download/write data: {err}')
 
 class StreamDown:
     def __init__(self, app) -> None:
@@ -116,10 +122,7 @@ class StreamDown:
         self.ui.downButton.clicked.connect(self.download)
         self.ui.stopButton.clicked.connect(self.stop)
         self.ui.outButton.clicked.connect(self.select_out)
-        self.ui.ffmpegEdit.setText('ffmpeg -i pipe:0 %out%')
-        # TODO: remove
-        self.ui.outEdit.setText('test.mp4')
-        self.ui.metaEdit.setText('https://euw11.playlist.ttvnw.net/v1/playlist/Cr8Ie-9S7gwsXhIFoYHdNAzvL7UAoeqjtnLcNluHZg9XycfpVe4yoJLzZGgDH2A5AjQHm1oVjkrVz3eCqA5Lm3glVwCeMT5TlrkxEfv1naSBcgH7EEu62-8U_oNTI1C1yvbRuDR_NDozXsTeDLDV_SEB6fTZJvrmNHDYRZbsFc7qvf27vams6qSEUyqwX-f1J7EdR_aJg3j47C6r8_LaFpwxikBuQYBSFn4tX2z1AA3NSY6efV_HWVLF_v1yiPEs5CQfCn52_i7roilGh8YfS8wVnZVoNxf-RgQWc_bQS8PqCt77hBSnwIhqXdBVAv-XcWbZ17a_6Pa2ja0qyzjhWO7U7flQd8a9Gb6Y9ZR3-Xcz8aIj9s9PQVhgz1DYv2GCh398iZWcz1x82FzpviY5Mcv3yd2LRzImkr-py94CiP5q8E8X0OI0N6WqKIg9VcLdA3_y1yYCtLeeZkLJkw-iCWl8JgS35WzbI1MTbNk6x41TwLcwT2R4vLUFIP60mIdVjZdEGlrSD-XNXiCfbJFg-BN1hoqfYF-5whmGv9p_nSZu9Fx5H3meTjtYTiDGBvcaQ45cwFp513uUC66w4nW6nFvLa5hF7oaN6TEL8CiN_0_UiBUFN0Na_62mz9Fc8axidmzT7hG1KnFyK5ZdUGXzJ3eu24FA1Ram5n42gETTM3wcOJC1OJVNjZUZX3Iu2A5K1bfz-84y1StLB15uT5RLHbpnHIZfBGzZnzpDn4Yj9BZpsd1i6WHPOON7Rx-8XcOP9oMJ1u4JDkWJAj377BjSFp9CugeaQikv8aCYM_ttJKER1zHokYK78sPBKD1LYCYtBz6ziLXPDIqQp6hJJIFGiFtpemp9-mXFR-A8rrBXGyMn7f9bktgtUkC-vnQQUEI7GNuLO3LZOoSK80JIsgiuwIxG7E-IoecwIaRL_vgPE9QX_WHv-PaAHAc7urPZwicryZDehANRQWCAIJYYG6vAkrUiRPD-ePZToMB1Lp2AodUjMIQHNe9wuOk-IxMo3iJhoHa2f0SQpDEr8idykEdCW8pNnogZl-U4C7BrugIuQiff-XN0gBKzUWOeg_1D4_3aR1Blc4sC0BcqKuLJadH3RR6UA6-QLi8RBSWcU7vfjCt-uQZNQSZS65IP_kB-RgvT16NQrb3qz2YrTjfE0iLlS0MeR0cLobGK5G_erx34eO3hpmo5c450T-LMtKlisAHpvABpj0KQEWufe8H8VmY2SUE2wCN_s62OAAx8LZOKZRJspq4aMnuHRsg5AtxNKA64oc5dYX28tcuodCiYtdNkXJFE3vQYYP59cmtNdMNF1XRtkjaiD7DwkL-waRI1s4MpxpTV0kRvZoP-yvVpZiMZPKqp6DGFA8Lcl58IkeTVIuZYxEmN5hcIgbgp0cJc614-lniCuv9Bk5hd0MGANVcfQOcn52uiJh9Ys13TAsnKJdp-gBoM0tYKDa2UjJkGWPYEIAEqCWV1LXdlc3QtMjCVDQ.m3u8')
+        self.ui.ffmpegEdit.setText(writer.get_default_ffmpeg_cmd(True))
         self.win.show()
 
     def stop(self) -> None:
