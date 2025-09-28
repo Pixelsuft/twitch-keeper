@@ -14,4 +14,11 @@ python main.py
 1) Open needed VOD in browser
 2) Set needed quality
 3) Open network section in dev tools
-4) Find a request to URL something like 123.ts or 456.mp4 and copy that URL
+4) Find a request to URL something like 123.ts or 456.mp4 and copy that URL (use .ts or .mp4 filter to find)
+## Obtaining stream metadata URL
+1) Open needed stream in browser
+2) Set needed quality
+3) Open network section in dev tools
+4) Find a request to URL which ends with .m3u8 and copy that URL (use .m3u8 filter to find)
+### FFmpeg note
+Using FFmpeg without a hardware acceleration to download a stream will likely result in underruns
